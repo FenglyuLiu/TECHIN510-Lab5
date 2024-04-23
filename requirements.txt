@@ -1,8 +1,7 @@
-streamlit-pydantic
-psycopg2-binary
+streamlit
 python-dotenv
-requests
+psycopg2-binary
 beautifulsoup4
-datetime
-sqlalchemy
-streamlit-aggrid
+tqdm
+google-generativeai
+requests
