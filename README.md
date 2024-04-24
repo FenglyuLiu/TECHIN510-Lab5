@@ -37,13 +37,21 @@ Open the terminal and run the following commands:
 Within the download you'll find the following directories and files, logically grouping common assets and providing both compiled and minified variations. You'll see something like this:
 
 AI-Fairy-Tale/
+
 ├── .env
+
 ├── .gitignore
+
 ├── app_json_rest_api.py
+
 ├── app.py
+
 ├── db.py
+
 ├── README.md
+
 ├── requests_api.py
+
 └── requirements.txt
 
 
