@@ -5,3 +5,4 @@ beautifulsoup4
 tqdm
 google-generativeai
 requests
+sqlalchemy
