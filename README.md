@@ -4,6 +4,9 @@
 
 AI Fairy Tale is a web application that uses advanced natural language processing to generate fairy tales based on user input. This project is designed to demonstrate the integration of AI capabilities in frontend development, providing a unique storytelling experience.
 
+<img width="738" alt="Screenshot 2024-04-23 at 23 38 47" src="https://github.com/FenglyuLiu/TECHIN510-Lab5/assets/88125716/794e74e1-80c7-4167-98f8-e04feabdf028">
+
+
 
 ## Features
 
