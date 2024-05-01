@@ -6,6 +6,9 @@ AI Fairy Tale is a web application that uses advanced natural language processin
 
 <img width="738" alt="Screenshot 2024-04-23 at 23 38 47" src="https://github.com/FenglyuLiu/TECHIN510-Lab5/assets/88125716/794e74e1-80c7-4167-98f8-e04feabdf028">
 
+I want the user to have more control over the story, depending on time, characters, events, and so on. I added more detailed explanations to each prompt, which can help LLM generate more layered and detailed stories.
+
+<img width="1507" alt="Screenshot 2024-05-01 at 10 24 21" src="https://github.com/FenglyuLiu/TECHIN510-Lab5-Lab6/assets/88125716/bf209d66-f4fc-4856-a792-8200dbf7be1f">
 
 
 ## Features
