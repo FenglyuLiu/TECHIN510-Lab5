@@ -6,3 +6,4 @@ tqdm
 google-generativeai
 requests
 sqlalchemy
+openai

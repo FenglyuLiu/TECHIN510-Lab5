@@ -3,33 +3,60 @@ import google.generativeai as genai
 from dotenv import load_dotenv
 import streamlit as st
 from db import Database
+import requests
+import openai
+import psycopg2
+
 
 load_dotenv()
 
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 model = genai.GenerativeModel('gemini-pro')
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 def generate_content(prompt):
-    # This function will send the prompt to the AI model and return the generated text
     try:
         response = model.generate_content(prompt)
-        return response.text  # Assuming the response object has a text attribute containing the generated text
+        return response.text
     except Exception as e:
         return f"An error occurred: {e}"
 
-    
+
+def generate_fairytale_image(description):
+    try:
+        response = openai.Image.create(
+            model="dall-e-3",
+            prompt=description,
+            size="1024x1024",
+            quality="standard",
+            n=1
+        )
+        if response.status_code == 200:
+            image_url = response['data'][0]['url']
+            return image_url
+        else:
+            image_url = "https://drive.google.com/file/d/166hH2hHF1kDpa5ZwzvJ3UYyntBni-l6s/view?usp=sharing"
+            return image_url
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None
+
+database_url = os.getenv('DATABASE_URL')
+db = Database(database_url)
+
+
 def generate_fairy_tale(user_request):
     prompt_template = """
-    You are an expert at telling fairytales.
+    You are an expert at telling fairytales. You are Hans Christian Andersen.
 
     Please take the users request and write a fairytale for them.
 
     Please include the following details:
-    - The background of the story
-    - The main character that will be in the story
-    - The challenges that will be faced
-    - The actions that will be taken
-    - The result of the story
+    - Think about the social context of the story. Especially, according to the time of the story.
+    - The main character that will be in the story. What's his/her name, interests and personalities.
+    - The challenges that will be faced and why is it challenging.
+    - The actions that will be taken, this will relate to the main character's characteristics.
+    - The result of the story and its impact for the character and the world.
 
     The user's request is:
     {user_request}
@@ -43,49 +70,44 @@ def generate_fairy_tale(user_request):
 
     return generated_story
 
+# Setup sidebar and main area
+with st.sidebar:
+    st.header("🐠 Create Your Fairy Tale")
+    when = st.text_input("🕒 When did it happen?")
+    where = st.text_input("🌏 Where did it happen?")
+    character = st.text_input("🤵 Who is the main character?")
+    what_happened = st.text_input("📷 What happened?")
+    generate_button = st.button("Generate Fairy Tale")
+
+if generate_button:
+    prompt = f"When: {when}, Where: {where}, Character: {character}, Event: {what_happened}"
+    story_generated = generate_fairy_tale(prompt)
+    if story_generated:
+        st.header("👀 Generated Fairy Tale")
+        st.write(story_generated)
+        image_url = generate_fairytale_image(story_generated[:100])  # Use the first 100 characters for image generation
+        if image_url is None:
+            st.warning("Failed to generate image. Saving the story without an image.")
+        
+        # Save the story and the image URL to the database, even if image_url is None
+        db.insert_fairy_tale(prompt, story_generated, image_url)
 
 
-st.title("🎏 AI Fairy Tale")
+        if image_url:
+            st.image(image_url, caption="Visual Representation of the Story")
 
-prompt = st.text_area("Enter your fairytale request (background, characters, challenges, actions, result, etc.):")
 
-if st.button("Generate Fairy Tale"):
-    reply = generate_fairy_tale(prompt)
-    if reply:
-        st.write(reply)
-        database_url = os.getenv('DATABASE_URL')
-        db = Database(database_url)
-        with db:
-            db.create_table()
-            db.insert_fairy_tale(prompt, reply)
-            st.success("Fairy tale saved successfully!")
-
-# Always display the fairy tales from the database
+# Display saved and new fairy tales with images
 database_url = os.getenv('DATABASE_URL')
-db = Database(database_url)
-with db:
+with Database(database_url) as db:
+    db.create_table()
     df = db.fetch_fairy_tales()
-    if not df.empty:
-        # Styling for the cards
-        st.markdown("""
-        <style>
-        .card {
-            margin: 10px;
-            padding: 10px;
-            box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
-            transition: 0.3s;
-            border-radius: 5px; /* 5px rounded corners */
-        }
-        </style>
-        """, unsafe_allow_html=True)
-
-        # Display the cards
-        for index, row in df.iterrows():
-            with st.container():
-                st.markdown(f"""
-                <div class="card">
-                <h3>{row['prompt']}</h3>
-                <p>{row['fairy_tale']}</p>
-                </div>
-                """, unsafe_allow_html=True)
-
+    if df:  # This checks if the list is not empty
+        st.header("🎏 Fairy Tales")
+        for row in df:
+            with st.expander(f"Story {row[0]} - {row[1]}"):
+                st.text_area("", value=row[2], height=300, key=f"ta{row[0]}")
+                if row[3]:
+                    st.image(row[3], caption="Image related to the story")
+        else:
+            print("No fairy tales found.")
